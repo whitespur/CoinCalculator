@@ -32,6 +32,7 @@
 @property (strong, nonatomic) UIButton *calculateBtn;
 @property (assign, nonatomic) double close;
 @property (strong, nonatomic) NSString *isAudit;
+@property (assign, nonatomic) NSInteger status;
 
 @property (strong, nonatomic) UIWebView *webView;
 
@@ -79,6 +80,14 @@
         }
     }];
     [dataTask resume];
+    AFNetworkReachabilityManager *reachabilityManager = [AFNetworkReachabilityManager sharedManager];
+    [reachabilityManager startMonitoring];
+    [reachabilityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+//        if (status == AFNetworkReachabilityStatusNotReachable) {
+//            self.status =
+//        }
+        self.status = status;
+    }];
 }
 
 - (void)setStatusBarBackgroundColor:(UIColor *)color {
@@ -213,52 +222,72 @@
 }
 
 - (void)refresh{
-    [self getCoinData];
-    self.buyinPrice.text =@"";
-    self.buyinAmount.text = @"";
-    self.earnedAmount.text =@"--";
-    self.earnedPercent.text =@"--";
-    self.earnedAmount.textColor = [UIColor blackColor];
-    self.earnedPercent.textColor = [UIColor blackColor];
-}
-
-- (void)calculate{
     
-    if ([self.buyinAmount.text isEqualToString:@""]||[self.buyinPrice.text isEqualToString:@""]||[self.buyinAmount.text isEqualToString:@"0"]) {
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"" message:@"请输入买入价和买入数量" preferredStyle:UIAlertControllerStyleAlert];
-        NSString *message;
-        if ([self.buyinAmount.text isEqualToString:@""]&&[self.buyinPrice.text isEqualToString:@""]) {
-            message = @"请输入买入价和买入数量";
-        }else if ([self.buyinPrice.text isEqualToString:@""]){
-            message = @"请输入买入价格";
-        }
-        else if ([self.buyinAmount.text isEqualToString:@""]){
-            message = @"请输入买入数量";
-        }
-        else{
-            message = @"买入数量不能为0";
-        }
-        alertController.message = message;
+    if (self.status == AFNetworkReachabilityStatusUnknown||self.status == AFNetworkReachabilityStatusNotReachable) {
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"" message:@"未检测到网络" preferredStyle:UIAlertControllerStyleAlert];
         [alertController addAction:[UIAlertAction actionWithTitle:@"确认" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alertController dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alertController animated:YES completion:nil];
+        
+    }else{
+        [self getCoinData];
+        self.buyinPrice.text =@"";
+        self.buyinAmount.text = @"";
+        self.earnedAmount.text =@"--";
+        self.earnedPercent.text =@"--";
+        self.earnedAmount.textColor = [UIColor blackColor];
+        self.earnedPercent.textColor = [UIColor blackColor];
     }
-    else{
-        double buyinValue = [self.buyinPrice.text doubleValue];
-        double earnedValue = self.close - buyinValue;
-        self.earnedAmount.text = [NSString stringWithFormat:@"%.2f",earnedValue * [self.buyinAmount.text doubleValue]];
-        self.earnedAmount.textColor = earnedValue > 0 ? [UIColor greenColor]:[UIColor redColor];
-        self.earnedPercent.text = earnedValue > 0 ?[NSString stringWithFormat:@"+%.2f %%", earnedValue * 100/buyinValue]:[NSString stringWithFormat:@"%.2f %%", earnedValue * 100/buyinValue];
-        self.earnedPercent.textColor = earnedValue > 0 ? [UIColor greenColor]:[UIColor redColor];
+}
+
+- (void)calculate{
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"" message:@"请输入买入价和买入数量" preferredStyle:UIAlertControllerStyleAlert];
+    NSString *message;
+    
+    if (self.status == AFNetworkReachabilityStatusUnknown||self.status == AFNetworkReachabilityStatusNotReachable) {
+        message = @"未检测到网络";
+    }else{
+        if ([self.buyinAmount.text isEqualToString:@""]||[self.buyinPrice.text isEqualToString:@""]||[self.buyinAmount.text isEqualToString:@"0"]||!self.close) {
+            
+            if ([self.buyinAmount.text isEqualToString:@""]&&[self.buyinPrice.text isEqualToString:@""]) {
+                message = @"请输入买入价和买入数量";
+            }else if ([self.buyinPrice.text isEqualToString:@""]){
+                message = @"请输入买入价格";
+            }
+            else if ([self.buyinAmount.text isEqualToString:@""]){
+                message = @"请输入买入数量";
+            }
+            else if([self.buyinAmount.text isEqualToString:@"0"]){
+                message = @"买入数量不能为0";
+            }
+            else{
+                message = @"请先刷新获取当前价";
+            }
+        }
+        else{
+            double buyinValue = [self.buyinPrice.text doubleValue];
+            double earnedValue = self.close - buyinValue;
+            self.earnedAmount.text = [NSString stringWithFormat:@"%.2f",earnedValue * [self.buyinAmount.text doubleValue]];
+            self.earnedAmount.textColor = earnedValue > 0 ? [UIColor greenColor]:[UIColor redColor];
+            self.earnedPercent.text = earnedValue > 0 ?[NSString stringWithFormat:@"+%.2f %%", earnedValue * 100/buyinValue]:[NSString stringWithFormat:@"%.2f %%", earnedValue * 100/buyinValue];
+            self.earnedPercent.textColor = earnedValue > 0 ? [UIColor greenColor]:[UIColor redColor];
+            return;
+        }
     }
+    alertController.message = message;
+    [alertController addAction:[UIAlertAction actionWithTitle:@"确认" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alertController dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    [self presentViewController:alertController animated:YES completion:nil];
 }
 
 #pragma mark - setter and getter
 - (UILabel *)AppTitle{
     if (!_AppTitle) {
         _AppTitle = [[UILabel alloc] init];
-        _AppTitle.text = @"BitX钱包计算器";
+        _AppTitle.text = @"BitX计算器";
         _AppTitle.backgroundColor = [UIColor colorWithRed:65/255.0 green:149/255.0 blue:213/255.0 alpha:1];
         _AppTitle.textColor = [UIColor whiteColor];
         _AppTitle.layer.cornerRadius = 2;
@@ -301,6 +330,7 @@
 - (UILabel *)currentPrice{
     if (!_currentPrice) {
         _currentPrice = [[UILabel alloc] init];
+        _currentPrice.text = @"--";
     }
     return _currentPrice;
     
@@ -318,6 +348,7 @@
 - (UILabel *)allDayRise{
     if (!_allDayRise) {
         _allDayRise = [[UILabel alloc] init];
+        _allDayRise.text = @"--";
     }
     return _allDayRise;
     
