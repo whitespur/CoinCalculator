@@ -447,7 +447,7 @@
 				TargetAttributes = {
 					C9D5E5F820133C1F006D0EF9 = {
 						CreatedOnToolsVersion = 9.1;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					C9D5E61020133C1F006D0EF9 = {
 						CreatedOnToolsVersion = 9.1;
@@ -712,14 +712,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 5264M2J67E;
 				INFOPLIST_FILE = CoinCalculator/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.codery.xiaoyuzhuan;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = 1;
+				PROVISIONING_PROFILE = "196ecf8f-6397-4394-951b-b876b27c46d8";
+				PROVISIONING_PROFILE_SPECIFIER = developxiaoyuzhuanqian20180108;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -727,14 +730,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 5264M2J67E;
 				INFOPLIST_FILE = CoinCalculator/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.codery.xiaoyuzhuan;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = 1;
+				PROVISIONING_PROFILE = "a8c127db-c827-45df-953f-000fb1d1a7c9";
+				PROVISIONING_PROFILE_SPECIFIER = dist_wallet;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
